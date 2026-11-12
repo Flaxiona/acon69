@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ลงทะเบียนงานรังสิตวิชาการ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary-pink: #E91E63; --primary-blue: #03A9F4; --bg-color: #f4f6f9; }
+        body { font-family: 'Noto Sans Thai', sans-serif; font-size: 16px; background: linear-gradient(135deg, #ffebee 0%, #e1f5fe 100%); min-height: 100vh; margin: 0; display: flex; justify-content: center; align-items: center; color: #333; }
+        .container { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 90%; max-width: 600px; text-align: center; box-sizing: border-box; margin: 20px 0; }
+        
+        /* CSS สำหรับโลโก้ ตัดพื้นหลังให้เนียน */
+        /* CSS สำหรับโลโก้ ดึงข้อความให้มาชิด และปรับตำแหน่ง */
+        /* แก้ไข CSS โลโก้ใหม่ ให้จัดกลางพอดี ไม่ทับซ้อน */
+        .logo { max-width: 180px; margin-bottom: 15px; mix-blend-mode: multiply; }
+        
+        h1 { font-size: 22px; color: var(--primary-pink); margin-bottom: 5px; font-weight: 700; }
+        h2 { font-size: 18px; color: var(--primary-blue); margin-bottom: 25px; font-weight: 600; }
+        h3 { font-size: 18px; color: #333; margin-bottom: 15px; }
+        .btn { background: var(--primary-blue); color: white; border: none; padding: 14px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin: 10px; width: calc(100% - 20px); max-width: 300px; font-family: 'Noto Sans Thai', sans-serif; font-weight: 600; }
+        .btn-pink { background: var(--primary-pink); }
+        .btn-outline { background: white; color: var(--primary-blue); border: 2px solid var(--primary-blue); }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .search-box { width: 100%; padding: 12px; font-size: 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: 'Noto Sans Thai', sans-serif; box-sizing: border-box; margin-bottom: 15px; }
+        .name-list { text-align: left; max-height: 350px; overflow-y: auto; margin: 10px 0 20px 0; border: 2px solid #f0f0f0; border-radius: 8px; padding: 10px; }
+        .name-item { display: flex; align-items: center; padding: 12px 10px; border-bottom: 1px solid #f0f0f0; }
+        .name-item label { margin-left: 12px; cursor: pointer; flex: 1; font-size: 16px; }
+        .name-item input[type="checkbox"] { transform: scale(1.4); cursor: pointer; accent-color: var(--primary-pink); }
+        .name-item.disabled { color: #aaa; background: #fdfdfd; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #eee; padding: 12px; font-size: 16px; }
+        th { background-color: var(--primary-pink); color: white; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-pink); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 30px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- นำลิงก์ URL ของรูปภาพโลโก้มาใส่ตรง src="..." -->
+    <img src="https://drive.google.com/uc?export=view&id=1pbCSn3X6Ch0HRDG1kc7vKgd-ctHPN_5X" alt="Logo" class="logo" onerror="this.style.display='none'">
+
+    <h1>ลงทะเบียนงานรังสิตวิชาการ</h1>
+    <h2>หมวด ACADEMIC CONFERENCE</h2>
+
+    <div id="step-loading" class="step active">
+        <div class="loader"></div>
+        <p id="loading-text">กำลังเชื่อมต่อฐานข้อมูล...</p>
+    </div>
+
+    <div id="step-1" class="step">
+        <h3>เลือกรอบการแข่งขัน</h3>
+        <button class="btn btn-pink" onclick="selectPeriod('morning')">รอบเช้า (Morning)</button>
+        <button class="btn" onclick="selectPeriod('afternoon')">รอบบ่าย (Afternoon)</button>
+    </div>
+
+    <div id="step-2" class="step">
+        <h3>เลือกประเภทการแข่งขัน</h3>
+        <div id="type-buttons"></div>
+        <br><button class="btn btn-outline" onclick="showStep('step-1')" style="padding: 8px 15px;">ย้อนกลับ</button>
+    </div>
+
+    <div id="step-3" class="step">
+        <h3>เลือกรายชื่อ (เลือกได้หลายคน)</h3>
+        <input type="text" id="search-input" class="search-box" placeholder="🔍 พิมพ์ค้นหาชื่อ..." onkeyup="handleSearch(event)">
+        <div id="name-list" class="name-list"></div>
+        <button id="btn-submit" class="btn btn-pink" onclick="submitRegistration()">ยืนยันการลงทะเบียน</button>
+        <button class="btn btn-outline" onclick="showStep('step-2')" style="width: auto;">ย้อนกลับ</button>
+    </div>
+
+    <div id="step-4" class="step">
+        <h3 style="color: #4CAF50;">✅ ลงทะเบียนสำเร็จ!</h3>
+        <table>
+            <thead><tr><th>ชื่อ-นามสกุล</th><th>ลำดับนำเสนอ</th><th id="location-header">สถานที่</th></tr></thead>
+            <tbody id="success-table-body"></tbody>
+        </table>
+        <br>
+        <!-- แก้ไขแล้ว: ให้โหลดข้อมูลใหม่เบื้องหลังแทนการ Refresh Browser -->
+        <button class="btn" onclick="resetApp()">กลับสู่หน้าหลัก</button>
+    </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+    let participantsData = [];
+    let selectedPeriod = ''; 
+    let selectedType = '';
+
+    window.onload = function() {
+        fetchData();
+    };
+
+    function fetchData() {
+        document.getElementById('loading-text').textContent = 'กำลังเชื่อมต่อฐานข้อมูล...';
+        document.getElementById('loading-text').style.color = '';
+        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+        document.getElementById('step-loading').classList.add('active');
+        
+        serverApi
+            .withSuccessHandler(function(data) {
+                participantsData = data;
+                showStep('step-1');
+            })
+            .withFailureHandler(function(error) {
+                document.getElementById('loading-text').textContent = '❌ ' + error.message;
+                document.getElementById('loading-text').style.color = 'red';
+            })
+            .getParticipantsData();
+    }
+
+    function showStep(stepId) {
+        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+        document.getElementById(stepId).classList.add('active');
+        if(stepId === 'step-3') { document.getElementById('search-input').value = ''; renderNameList(''); }
+    }
+
+    function selectPeriod(period) {
+        selectedPeriod = period;
+        const availableData = participantsData.filter(p => {
+            if (period === 'morning') return p['ห้องแข่งขันภาคเช้า'];
+            if (period === 'afternoon') return p['หมายเลขที่นั่งภาคบ่าย'];
+            return false;
+        });
+
+        const types = [...new Set(availableData.map(p => p['ประเภทการแข่งขัน']))].filter(t => t);
+        const typeContainer = document.getElementById('type-buttons');
+        typeContainer.innerHTML = types.length === 0 ? '<p>ไม่มีข้อมูลในรอบที่เลือก</p>' : '';
+        
+        // กำหนดชุดสีให้แต่ละปุ่ม (เรียงจาก ฟ้า > ฟ้าอมเขียว > คราม > ม่วง > ชมพู)
+        const buttonColors = ['#03A9F4', '#00BCD4', '#3F51B5', '#9C27B0', '#E91E63'];
+
+        types.forEach((type, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn'; 
+            btn.textContent = type;
+            
+            // สั่งให้ปุ่มดึงสีจากชุดสีมาใช้ โดยอิงตามลำดับ
+            btn.style.backgroundColor = buttonColors[index % buttonColors.length];
+            
+            btn.onclick = () => { selectedType = type; showStep('step-3'); };
+            typeContainer.appendChild(btn);
+        });
+        showStep('step-2');
+    }
+
+    function renderNameList(searchQuery) {
+        const listContainer = document.getElementById('name-list');
+        listContainer.innerHTML = '';
+
+        const filteredData = participantsData.filter(p => {
+            const hasPeriod = selectedPeriod === 'morning' ? p['ห้องแข่งขันภาคเช้า'] : p['หมายเลขที่นั่งภาคบ่าย'];
+            const matchSearch = String(p['ชื่อ-นามสกุล']).includes(searchQuery) || String(p['รหัสอ้างอิง (Unique ID)']).includes(searchQuery);
+            return hasPeriod && p['ประเภทการแข่งขัน'] === selectedType && matchSearch;
+        });
+
+        if (filteredData.length === 0) {
+            listContainer.innerHTML = '<p style="text-align:center; color:#888;">ไม่พบรายชื่อ</p>'; return;
+        }
+
+        filteredData.forEach(p => {
+            const isRegistered = selectedPeriod === 'morning' ? p['สถานะลงทะเบียนภาคเช้า'] : p['สถานะลงทะเบียนภาคบ่าย'];
+            const div = document.createElement('div');
+            div.className = 'name-item' + (isRegistered ? ' disabled' : '');
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox'; checkbox.value = p['รหัสอ้างอิง (Unique ID)']; checkbox.id = 'chk-' + p['รหัสอ้างอิง (Unique ID)'];
+            if (isRegistered) checkbox.disabled = true;
+
+            const label = document.createElement('label');
+            label.htmlFor = checkbox.id; label.textContent = p['ชื่อ-นามสกุล'] + (isRegistered ? ' (ลงทะเบียนแล้ว)' : '');
+
+            div.appendChild(checkbox); div.appendChild(label); listContainer.appendChild(div);
+        });
+    }
+
+    function submitRegistration() {
+        const selectedIds = Array.from(document.querySelectorAll('#name-list input[type="checkbox"]:checked')).map(chk => chk.value);
+        if (selectedIds.length === 0) return alert('กรุณาเลือกรายชื่ออย่างน้อย 1 คนครับ');
+
+        const btn = document.getElementById('btn-submit');
+        btn.disabled = true; btn.textContent = 'กำลังบันทึกข้อมูล...';
+
+        serverApi
+            .withSuccessHandler(function(res) {
+                if (res.status === 'success') {
+                    const tbody = document.getElementById('success-table-body');
+                    tbody.innerHTML = '';
+                    document.getElementById('location-header').textContent = selectedPeriod === 'morning' ? 'ห้องแข่งขัน' : 'หมายเลขที่นั่ง';
+                    res.registered_data.forEach(p => {
+                        const tr = document.createElement('tr');
+                        [p.name, p.sequence, selectedPeriod === 'morning' ? p.room : p.seat].forEach(value => { const td = document.createElement('td'); td.textContent = value || ''; tr.appendChild(td); });
+                        tbody.appendChild(tr);
+                    });
+                    showStep('step-4');
+                } else {
+                    alert('ข้อผิดพลาด: ' + res.message);
+                    btn.disabled = false; btn.textContent = 'ยืนยันการลงทะเบียน';
+                }
+            })
+            .withFailureHandler(function(error) {
+                alert('ข้อผิดพลาด: ' + error.message);
+                btn.disabled = false; btn.textContent = 'ยืนยันการลงทะเบียน';
+            })
+            .registerMultipleParticipants(selectedIds, selectedPeriod);
+    }
+
+    // ฟังก์ชันใหม่: รีเซ็ตแอปและโหลดข้อมูลใหม่เบื้องหลังโดยไม่ต้องรีเฟรชหน้าต่าง
+    function resetApp() {
+        selectedPeriod = ''; 
+        selectedType = '';
+        document.getElementById('btn-submit').disabled = false;
+        document.getElementById('btn-submit').textContent = 'ยืนยันการลงทะเบียน';
+        
+        fetchData(); 
+    }
+</script>
+</body>
+</html>
